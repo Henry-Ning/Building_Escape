@@ -19,7 +19,9 @@ void UWorldPosition::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	UE_LOG(LogTemp, Warning, TEXT("This is yellow"));
+	UE_LOG(LogTemp, Error, TEXT("This is red"));
+	UE_LOG(LogTemp, Display, TEXT("This is grey"));
 	
 }
 

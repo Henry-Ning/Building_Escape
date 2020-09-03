@@ -1,10 +1,10 @@
 // Copyright Henry Ning 2020
 
+ 
 #include "Grabber.h"
 #include "DrawDebugHelpers.h"
-#include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
-
+#include "GameFramework/PlayerController.h"
 
 #define OUT
 
@@ -15,7 +15,6 @@ UGrabber::UGrabber()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 }
-
 
 // Called when the game starts
 void UGrabber::BeginPlay()
@@ -33,14 +32,14 @@ void UGrabber::SetupInputComponent()
 	{
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
-	}
+	}	
 }
 
-//Checking for Physics Handle Component
+// Checking for Physics Handle Component
 void UGrabber::FindPhysicsHandle()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle == nullptr)
+	if (!PhysicsHandle)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No physics handle component found on %s!"), *GetOwner()->GetName());
 	}
@@ -50,37 +49,39 @@ void UGrabber::Grab()
 {
 	FHitResult HitResult = GetFirstPhysicsBodyInReach();
 	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
+	AActor* ActorHit = HitResult.GetActor();
 
-	//If we hit something then attach the physics handle
-	if (HitResult.GetActor())
-	{
+	// If we hit something then attach the physics handle.
+	if (ActorHit)
+	{	
+		if (!PhysicsHandle) {return;}
 		PhysicsHandle->GrabComponentAtLocation
 			(
-				ComponentToGrab,
-				NAME_None,
-				GetPlayersReach()
+			ComponentToGrab,
+			NAME_None,
+			GetPlayersReach()
 			);
-	}	
+	}		
 }
-
-
 
 void UGrabber::Release()
 {
+	if (!PhysicsHandle) {return;}
 	PhysicsHandle->ReleaseComponent();
 }
-
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	// if the physics handle is attached
-	if(PhysicsHandle->GrabbedComponent)
+
+	// If the physic handle is attach.
+	if (!PhysicsHandle) {return;}
+	if (PhysicsHandle->GrabbedComponent)
 	{
+		// Move the object we are holding.
 		PhysicsHandle->SetTargetLocation(GetPlayersReach());
 	}
-		//Move the object we are holding
 }
 
 FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
@@ -96,7 +97,6 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	);
-
 	return Hit;
 }
 
@@ -106,8 +106,9 @@ FVector UGrabber::GetPlayersWorldPos() const
 	FRotator PlayerViewPointRotation;
 
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewPointLocation, 
-		OUT PlayerViewPointRotation);
+		OUT PlayerViewPointLocation,
+		OUT PlayerViewPointRotation
+	);
 
 	return PlayerViewPointLocation;
 }
@@ -118,8 +119,9 @@ FVector UGrabber::GetPlayersReach() const
 	FRotator PlayerViewPointRotation;
 
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewPointLocation, 
-		OUT PlayerViewPointRotation);
+		OUT PlayerViewPointLocation,
+		OUT PlayerViewPointRotation
+	);
 
-	return PlayerViewPointLocation + PlayerViewPointRotation.Vector()*Reach;
+	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
 }

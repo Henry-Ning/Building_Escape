@@ -20,28 +20,29 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-private: 
+private:
 	float Reach = 100.f;
-
+	
+	UPROPERTY()
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
-	UInputComponent* InputComponent = nullptr; 
+	UPROPERTY()
+	UInputComponent* InputComponent = nullptr;
 
 	void Grab();
-	void Release();
+	void Release();	
 	void FindPhysicsHandle();
 	void SetupInputComponent();
 
-	//Return the first Actor within reach with physics body
+	// Return the first Actor within reach with physics body.
 	FHitResult GetFirstPhysicsBodyInReach() const;
 
-	//Return The Line Trace End
+	// Return The Line Trace End.
 	FVector GetPlayersReach() const;
 
-	//Get Players Position In World 
+	// Get Players Position In World.
 	FVector GetPlayersWorldPos() const;
 };
